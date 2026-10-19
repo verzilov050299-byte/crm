@@ -52,25 +52,31 @@ def parse_date(value: str):
 
 
 def ensure_column(connection, table: str, column: str, ddl: str) -> None:
-    """Добавляет колонку в уже существующую таблицу SQLite."""
-    rows = connection.execute(text(f"PRAGMA table_info({table})")).fetchall()
-    if not rows:
+    """Добавляет колонку, если её ещё нет (и SQLite, и PostgreSQL)."""
+    from sqlalchemy import inspect as sa_inspect
+
+    inspector = sa_inspect(connection)
+    if table not in inspector.get_table_names():
         return
-    names = {row[1] for row in rows}
+    names = {col["name"] for col in inspector.get_columns(table)}
     if column not in names:
         connection.execute(text(f"ALTER TABLE {table} ADD COLUMN {ddl}"))
 
 
 def ensure_schema() -> None:
     """Старую базу дополняем новыми полями — create_all сам их не добавит."""
+    dialect = db.engine.dialect.name
+    # Типы чуть отличаются у SQLite и Postgres
+    bool_ddl = "BOOLEAN DEFAULT TRUE" if dialect == "postgresql" else "BOOLEAN DEFAULT 1"
+    dt_ddl = "TIMESTAMP" if dialect == "postgresql" else "DATETIME"
     with db.engine.begin() as connection:
-        ensure_column(connection, "deals", "board_sort", "board_sort INTEGER NOT NULL DEFAULT 0")
-        ensure_column(connection, "deals", "funnel_id", "funnel_id INTEGER")
-        ensure_column(connection, "deals", "car", "car VARCHAR(120)")
-        ensure_column(connection, "deal_stages", "funnel_id", "funnel_id INTEGER")
-        ensure_column(connection, "users", "email", "email VARCHAR(120)")
-        ensure_column(connection, "users", "is_active", "is_active BOOLEAN DEFAULT 1")
-        ensure_column(connection, "users", "created_at", "created_at DATETIME")
+        ensure_column(connection, "deals", "board_sort", "INTEGER DEFAULT 0")
+        ensure_column(connection, "deals", "funnel_id", "INTEGER")
+        ensure_column(connection, "deals", "car", "VARCHAR(120)")
+        ensure_column(connection, "deal_stages", "funnel_id", "INTEGER")
+        ensure_column(connection, "users", "email", "VARCHAR(120)")
+        ensure_column(connection, "users", "is_active", bool_ddl)
+        ensure_column(connection, "users", "created_at", dt_ddl)
 
 
 def top_sort(stage_id: int) -> int:

@@ -17,9 +17,11 @@ def database_url() -> str:
         instance = Path(__file__).resolve().parent / "instance"
         instance.mkdir(exist_ok=True)
         return "sqlite:///" + str(instance / "bizcrm.db")
-    # Heroku/Render иногда отдают postgres:// — SQLAlchemy ждёт postgresql://
+    # Render отдаёт postgres://. Для SQLAlchemy 2.x явно берём драйвер psycopg2.
     if url.startswith("postgres://"):
-        url = url.replace("postgres://", "postgresql://", 1)
+        url = "postgresql+psycopg2://" + url[len("postgres://") :]
+    elif url.startswith("postgresql://") and "+psycopg" not in url:
+        url = "postgresql+psycopg2://" + url[len("postgresql://") :]
     return url
 
 
