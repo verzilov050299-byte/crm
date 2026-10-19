@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0a1a16">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Вход — BizCRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="login-body">
+  <main class="login-card">
+    <p class="brand">Biz<span>CRM</span></p>
+    <p class="muted">Автосервис · войдите, чтобы открыть свои воронки</p>
+
+    {% with messages = get_flashed_messages() %}
+      {% for message in messages %}
+        <div class="flash">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form class="form login-form" method="post">
+      <input type="hidden" name="next" value="{{ next_url }}">
+      <label>Логин или почта
+        <input name="login" required autocomplete="username">
+      </label>
+      <label>Пароль
+        <input name="password" type="password" required autocomplete="current-password">
+      </label>
+      <button class="btn" type="submit">Войти</button>
+    </form>
+
+    {% if allow_register %}
+    <p class="muted"><a href="{{ url_for('register') }}">Регистрация по почте</a></p>
+    {% endif %}
+
+    <p class="demo-title">Демо-роли. Пароль такой же, как логин.</p>
+    <div class="demo-grid">
+      {% for login_name, role_name, hint in demo_logins %}
+      <form method="post">
+        <input type="hidden" name="login" value="{{ login_name }}">
+        <input type="hidden" name="password" value="{{ login_name }}">
+        <input type="hidden" name="next" value="{{ next_url }}">
+        <button class="demo-user" type="submit">
+          <b>{{ role_name }}</b>
+          <span>{{ login_name }}</span>
+          <small>{{ hint }}</small>
+        </button>
+      </form>
+      {% endfor %}
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Права доступа — BizCRM{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Права доступа</h1>
+    <p class="muted">Администратор видит всё. Остальным отметьте воронки и просмотры. Если стоит «Менять», смотреть можно тоже.</p>
+  </div>
+  <a class="btn" href="{{ url_for('views_new') }}">+ Просмотр</a>
+</div>
+
+<form method="post">
+  <div class="table-wrap access-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Роль</th>
+          {% for funnel in funnels %}
+          <th>{{ funnel.name }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for role in roles %}
+        <tr>
+          <td><strong>{{ role.name }}</strong></td>
+          {% for funnel in funnels %}
+          {% set right = funnel_rights.get((role.id, funnel.id)) %}
+          <td>
+            <label class="check">
+              <input type="checkbox" name="view-{{ role.id }}-{{ funnel.id }}" {% if right and right.can_view %}checked{% endif %}>
+              Смотреть
+            </label>
+            <label class="check">
+              <input type="checkbox" name="edit-{{ role.id }}-{{ funnel.id }}" {% if right and right.can_edit %}checked{% endif %}>
+              Менять
+            </label>
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="section-title">Просмотры</h2>
+  <div class="table-wrap access-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Роль</th>
+          {% for view in views %}
+          <th>{{ view.funnel.name }} · {{ view.name }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for role in roles %}
+        <tr>
+          <td><strong>{{ role.name }}</strong></td>
+          {% for view in views %}
+          <td>
+            <label class="check">
+              <input type="checkbox" name="v-{{ role.id }}-{{ view.id }}" {% if (role.id, view.id) in view_rights %}checked{% endif %}>
+              Открыть
+            </label>
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="form-actions access-save">
+    <button class="btn" type="submit">Сохранить права</button>
+  </div>
+</form>
+{% endblock %}

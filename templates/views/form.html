@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Новый просмотр — BizCRM{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Новый просмотр</h1>
+    <p class="muted">Сохранённый срез воронки. Кому его показывать — на странице прав.</p>
+  </div>
+  <a class="btn btn-ghost" href="{{ url_for('access_edit') }}">К правам</a>
+</div>
+
+<form class="form" method="post">
+  <label>Название *
+    <input name="name" required placeholder="Например, К выдаче сегодня">
+  </label>
+  <label>Воронка
+    <select name="funnel_id">
+      {% for funnel in funnels %}
+      <option value="{{ funnel.id }}">{{ funnel.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Какие сделки показывать
+    <select name="semantics">
+      <option value="all">Все</option>
+      <option value="process">Только в работе</option>
+      <option value="success">Только успешные</option>
+      <option value="failure">Только отказы</option>
+    </select>
+  </label>
+  <div class="form-actions">
+    <button class="btn" type="submit">Сохранить просмотр</button>
+  </div>
+</form>
+{% endblock %}

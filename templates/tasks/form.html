@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Новая задача — BizCRM{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h1>Новая задача</h1>
+  <a class="btn btn-ghost" href="{{ url_for('tasks_list') }}">Назад</a>
+</div>
+
+<form class="form" method="post">
+  <label>Название *
+    <input name="title" required>
+  </label>
+  <label>Описание
+    <textarea name="description" rows="3"></textarea>
+  </label>
+  <label>Срок
+    <input type="date" name="deadline">
+  </label>
+  <label>Сделка
+    <select name="deal_id">
+      <option value="">—</option>
+      {% for d in deals %}
+        <option value="{{ d.id }}">{{ d.title }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Контакт
+    <select name="contact_id">
+      <option value="">—</option>
+      {% for c in contacts %}
+        <option value="{{ c.id }}">{{ c.full_name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <div class="form-actions">
+    <button class="btn" type="submit">Сохранить</button>
+  </div>
+</form>
+{% endblock %}

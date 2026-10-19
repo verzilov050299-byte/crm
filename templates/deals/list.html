@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Список сделок — BizCRM{% endblock %}
+
+{% block content %}
+<div class="page-head">
+<h1>Сделки</h1>
+  <div class="page-actions">
+  <div>
+    <a class="btn btn-ghost" href="{{ url_for('deals_kanban') }}">Канбан</a>
+    <a class="btn" href="{{ url_for('deals_new') }}">+ Сделка</a>
+  </div>
+</div>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Название</th>
+        <th>Воронка</th>
+        <th>Стадия</th>
+        <th>Сумма</th>
+        <th>Контакт</th>
+        <th>Компания</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for d in deals %}
+      <tr>
+        <td>
+          <strong>{{ d.title }}</strong>
+          {% if d.car %}<div class="muted">{{ d.car }}</div>{% endif %}
+        </td>
+        <td>{{ d.funnel.name if d.funnel else "—" }}</td>
+        <td>
+          {% if d.stage %}
+          <span class="badge {% if d.stage.semantics == 'success' %}success{% elif d.stage.semantics == 'failure' %}failure{% endif %}">
+            {{ d.stage.name }}
+          </span>
+          {% else %}—{% endif %}
+        </td>
+        <td>{{ '{:,.0f}'.format(d.opportunity or 0).replace(',', ' ') }} ₽</td>
+        <td>{{ d.contact.full_name if d.contact else '—' }}</td>
+        <td>{{ d.company.title if d.company else '—' }}</td>
+        <td>
+          {% if d.funnel_id in edit_ids %}
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('deals_edit', deal_id=d.id) }}">Изменить</a>
+          <form style="display:inline" method="post" action="{{ url_for('deals_delete', deal_id=d.id) }}" onsubmit="return confirm('Удалить сделку?')">
+            <button class="btn btn-danger btn-sm" type="submit">Удалить</button>
+          </form>
+          {% else %}
+          <span class="muted">только просмотр</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="muted">Пока нет сделок</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

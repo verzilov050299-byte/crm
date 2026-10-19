@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Новая воронка — BizCRM{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Новая воронка</h1>
+    <p class="muted">Отдельное направление со своими стадиями: ремонт, покраска, шиномонтаж или свой шаблон.</p>
+  </div>
+  <a class="btn btn-ghost" href="{{ url_for('deals_kanban') }}">Назад</a>
+</div>
+
+<form class="form" method="post">
+  <label>Название *
+    <input name="name" required placeholder="Например, Детейлинг">
+  </label>
+  <label>Откуда взять стадии
+    <select name="preset">
+      {% for code, preset in presets.items() %}
+        {% if code != 'generic' %}
+        <option value="{{ code }}">Как «{{ preset.name }}»</option>
+        {% endif %}
+      {% endfor %}
+      <option value="generic">Короткий шаблон: заявка, работа, готово</option>
+    </select>
+  </label>
+  <div class="form-actions">
+    <button class="btn" type="submit">Создать воронку</button>
+  </div>
+</form>
+{% endblock %}

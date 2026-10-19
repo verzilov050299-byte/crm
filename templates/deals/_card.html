@@ -1,0 +1,58 @@
+{# Карточка сделки. Кладётся и в колонку, и в ответ быстрого создания. #}
+{% set tasks_open = tasks_open|default(0) %}
+{% set overdue_open = overdue_open|default(0) %}
+{% set can_drag = can_drag|default(true) %}
+{% set client_name = deal.contact.full_name if deal.contact else "" %}
+{% set company_name = deal.company.title if deal.company else "" %}
+{% set car_name = deal.car or "" %}
+<article
+  class="deal-card"
+  draggable="{{ 'true' if can_drag else 'false' }}"
+  data-id="{{ deal.id }}"
+  data-sum="{{ deal.opportunity or 0 }}"
+  data-href="{{ url_for('deals_edit', deal_id=deal.id) }}"
+  data-search="{{ (deal.title ~ ' ' ~ car_name ~ ' ' ~ client_name ~ ' ' ~ company_name)|lower }}"
+>
+  <div class="deal-card-top">
+    {% if can_drag %}
+    <span class="deal-grip" draggable="true" role="button" title="Перетащите карточку" aria-label="Перетащить {{ deal.title }}"></span>
+    {% else %}
+    <span class="deal-grip"></span>
+    {% endif %}
+    <a class="deal-title" draggable="false" href="{{ url_for('deals_edit', deal_id=deal.id) }}">{{ deal.title }}</a>
+    <span class="deal-id">#{{ deal.id }}</span>
+  </div>
+
+  <div class="deal-sum">{{ '{:,.0f}'.format(deal.opportunity or 0).replace(',', ' ') }} ₽</div>
+  {% if car_name %}<div class="deal-car">{{ car_name }}</div>{% endif %}
+
+  <div class="deal-client">
+    <span class="avatar" aria-hidden="true">
+      {% if deal.contact %}
+        {% set parts = deal.contact.full_name.split() %}
+        {{ (parts[0][:1] ~ (parts[1][:1] if parts|length > 1 else ''))|upper }}
+      {% elif deal.company %}
+        {{ deal.company.title[:2]|upper }}
+      {% else %}
+        —
+      {% endif %}
+    </span>
+    <span class="deal-client-text">
+      <b>{{ client_name or "Без клиента" }}</b>
+      {% if company_name %}<small>{{ company_name }}</small>{% endif %}
+    </span>
+  </div>
+
+  <div class="deal-foot">
+    <span class="deal-date">от {{ deal.created_at.strftime('%d.%m.%Y') if deal.created_at else "—" }}</span>
+    {% if overdue_open %}
+      <span class="deal-alert">Просрочено</span>
+    {% elif tasks_open == 1 %}
+      <span class="deal-tasks">1 дело</span>
+    {% elif tasks_open %}
+      <span class="deal-tasks">{{ tasks_open }} дел</span>
+    {% else %}
+      <span class="deal-quiet">Нет дел</span>
+    {% endif %}
+  </div>
+</article>

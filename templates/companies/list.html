@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Компании — BizCRM{% endblock %}
+
+{% block content %}
+<div class="page-head">
+<h1>Компании</h1>
+  <div class="page-actions">
+  <a class="btn" href="{{ url_for('companies_new') }}">+ Компания</a>
+  </div>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Название</th>
+        <th>Телефон</th>
+        <th>Email</th>
+        <th>Адрес</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in companies %}
+      <tr>
+        <td><strong>{{ c.title }}</strong></td>
+        <td>{{ c.phone or '—' }}</td>
+        <td>{{ c.email or '—' }}</td>
+        <td>{{ c.address or '—' }}</td>
+        <td>
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('companies_edit', company_id=c.id) }}">Изменить</a>
+          <form style="display:inline" method="post" action="{{ url_for('companies_delete', company_id=c.id) }}" onsubmit="return confirm('Удалить компанию?')">
+            <button class="btn btn-danger btn-sm" type="submit">Удалить</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="muted">Пока нет компаний</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

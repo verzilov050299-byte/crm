@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0a1a16">
+  <title>Регистрация — BizCRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="login-body">
+  <main class="login-card">
+    <p class="brand">Biz<span>CRM</span></p>
+    <p class="muted">Регистрация сотрудника. Логин и пароль придут на почту.</p>
+
+    {% with messages = get_flashed_messages() %}
+      {% for message in messages %}
+        <div class="flash">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form class="form login-form" method="post">
+      <label>Имя и фамилия
+        <input name="name" required autocomplete="name" placeholder="Иван Петров">
+      </label>
+      <label>Рабочая почта
+        <input name="email" type="email" required autocomplete="email" placeholder="ivan@autoservice.ru">
+      </label>
+      <p class="muted">Роль по умолчанию: {{ role_name }}. Администратор потом может сменить права.</p>
+      <button class="btn" type="submit">Создать доступ</button>
+    </form>
+
+    <p class="muted"><a href="{{ url_for('login') }}">Уже есть аккаунт — войти</a></p>
+  </main>
+</body>
+</html>

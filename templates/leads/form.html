@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{% if lead %}Редактировать{% else %}Новый{% endif %} лид — BizCRM{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h1>{% if lead %}Редактировать лид{% else %}Новый лид{% endif %}</h1>
+  <a class="btn btn-ghost" href="{{ url_for('leads_list') }}">Назад</a>
+</div>
+
+<form class="form" method="post">
+  <label>Название *
+    <input name="title" required value="{{ lead.title if lead else '' }}">
+  </label>
+  <label>Имя клиента
+    <input name="name" value="{{ lead.name if lead else '' }}">
+  </label>
+  <label>Телефон
+    <input name="phone" value="{{ lead.phone if lead else '' }}">
+  </label>
+  <label>Email
+    <input type="email" name="email" value="{{ lead.email if lead else '' }}">
+  </label>
+  <label>Статус
+    <select name="status_id">
+      {% for key, label in statuses.items() %}
+        <option value="{{ key }}" {% if lead and lead.status_id == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Источник
+    <select name="source_id">
+      {% for key, label in sources.items() %}
+        <option value="{{ key }}" {% if lead and lead.source_id == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Ожидаемая сумма, ₽
+    <input type="number" step="0.01" name="opportunity" value="{{ lead.opportunity if lead else 0 }}">
+  </label>
+  <label>Комментарий
+    <textarea name="comments" rows="3">{{ lead.comments if lead else '' }}</textarea>
+  </label>
+  <div class="form-actions">
+    <button class="btn" type="submit">Сохранить</button>
+  </div>
+</form>
+{% endblock %}

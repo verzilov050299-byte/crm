@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}{% if deal %}Редактировать{% else %}Новая{% endif %} сделка — BizCRM{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h1>{% if deal %}Редактировать сделку{% else %}Новая сделка{% endif %}</h1>
+  <a class="btn btn-ghost" href="{{ url_for('deals_kanban') }}">Назад</a>
+</div>
+
+<form class="form" method="post">
+  <label>Название *
+    <input name="title" required value="{{ deal.title if deal else '' }}" placeholder="Замена ГРМ">
+  </label>
+  <label>Авто
+    <input name="car" value="{{ deal.car if deal and deal.car else '' }}" placeholder="Toyota Camry, А123АА77">
+  </label>
+  <label>Сумма, ₽
+    <input type="number" step="0.01" name="opportunity" value="{{ deal.opportunity if deal else 0 }}">
+  </label>
+  <label>Воронка *
+    <select name="funnel_id" id="funnel-select">
+      {% for funnel in funnels %}
+      <option value="{{ funnel.id }}" {% if selected_funnel_id == funnel.id %}selected{% endif %}>{{ funnel.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Стадия *
+    <select name="stage_id" id="stage-select" required>
+      {% for s in stages %}
+        <option value="{{ s.id }}" data-funnel="{{ s.funnel_id }}" {% if deal and deal.stage_id == s.id %}selected{% endif %}>
+          {{ s.name }}
+        </option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Контакт
+    <select name="contact_id">
+      <option value="">—</option>
+      {% for c in contacts %}
+        <option value="{{ c.id }}" {% if deal and deal.contact_id == c.id %}selected{% endif %}>{{ c.full_name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Компания
+    <select name="company_id">
+      <option value="">—</option>
+      {% for c in companies %}
+        <option value="{{ c.id }}" {% if deal and deal.company_id == c.id %}selected{% endif %}>{{ c.title }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Дата закрытия
+    <input type="date" name="close_date" value="{{ deal.close_date if deal and deal.close_date else '' }}">
+  </label>
+  <label>Комментарий
+    <textarea name="comments" rows="3">{{ deal.comments if deal else '' }}</textarea>
+  </label>
+  <div class="form-actions">
+    <button class="btn" type="submit">Сохранить</button>
+  </div>
+</form>
+<script>
+  // В списке стадий оставляем только выбранную воронку
+  const funnelSelect = document.getElementById("funnel-select");
+  const stageSelect = document.getElementById("stage-select");
+
+  function filterStages() {
+    const funnelId = funnelSelect.value;
+    let firstVisible = null;
+    Array.from(stageSelect.options).forEach((option) => {
+      const visible = option.dataset.funnel === funnelId;
+      option.hidden = !visible;
+      option.disabled = !visible;
+      if (visible && !firstVisible) firstVisible = option;
+    });
+    if (stageSelect.selectedOptions[0] && stageSelect.selectedOptions[0].disabled && firstVisible) {
+      firstVisible.selected = true;
+    }
+  }
+
+  funnelSelect.addEventListener("change", filterStages);
+  filterStages();
+</script>
+{% endblock %}

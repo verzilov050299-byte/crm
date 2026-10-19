@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Воронка сделок — BizCRM{% endblock %}
+{% block content_class %}content-kanban{% endblock %}
+
+{% block content %}
+{% if funnel %}
+<div class="funnel-switch" aria-label="Воронки">
+  {% for item in funnels %}
+  <a
+    class="funnel-tab {% if item.id == funnel.id %}is-on{% endif %}"
+    style="--stage: {{ item.color }}"
+    href="{{ url_for('deals_kanban', funnel=item.id) }}"
+  >{{ item.name }}</a>
+  {% endfor %}
+  {% if can_manage %}
+  <a class="funnel-tab funnel-add" href="{{ url_for('funnels_new') }}">+ Воронка</a>
+  {% endif %}
+</div>
+
+<div class="view-switch" aria-label="Просмотры">
+  {% for item in views %}
+  <a
+    class="view-tab {% if current_view and item.id == current_view.id %}is-on{% endif %}"
+    href="{{ url_for('deals_kanban', funnel=funnel.id, view=item.id) }}"
+  >{{ item.name }}</a>
+  {% endfor %}
+  {% if current_user.role.is_admin %}
+  <a class="view-tab" href="{{ url_for('views_new') }}">+ Просмотр</a>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="crm-toolbar">
+  <div class="crm-toolbar-left">
+    <div class="funnel-pill">
+      <span class="funnel-dot" {% if funnel %}style="background: {{ funnel.color }}"{% endif %}></span>
+      {{ funnel.name if funnel else "Нет доступных воронок" }}
+    </div>
+    <div class="crm-kpis">
+      <span class="kpi">В работе <b id="stat-open">{{ open_count }}</b></span>
+      <span class="kpi kpi-money">Сумма <b id="stat-sum">{{ money_label(open_sum) }}</b></span>
+      <span class="kpi kpi-won">Успешно <b id="stat-won">{{ money_label(won_sum) }}</b></span>
+      <span class="kpi kpi-lose">Провал <b id="stat-lose">{{ lose_count }}</b></span>
+    </div>
+  </div>
+
+  <div class="crm-toolbar-right">
+    {% if can_edit %}
+    <div class="save-state" id="save-state" data-state="saved">Сохранено</div>
+    {% else %}
+    <div class="save-state" id="save-state" data-state="saved">Только просмотр</div>
+    {% endif %}
+    <label class="crm-search">
+      <input id="kanban-search" type="search" placeholder="Поиск: сделка, авто, клиент" autocomplete="off">
+    </label>
+    <a class="btn btn-ghost btn-sm" href="{{ url_for('deals_list') }}">Список</a>
+    {% if can_edit %}
+    <a class="btn btn-sm" href="{{ url_for('deals_new', funnel=funnel.id if funnel else None) }}">+ Сделка</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="crm-board {% if not can_edit %}is-readonly{% endif %}" id="crm-board" data-readonly="{{ '0' if can_edit else '1' }}">
+  {% for stage in stages %}
+  {% set deals = deals_by_stage[stage.id] %}
+  {% set col_sum = deals|sum(attribute='opportunity') %}
+  <section
+    class="crm-col sem-{{ stage.semantics }}"
+    style="--stage: {{ stage.color }}"
+    data-stage-id="{{ stage.id }}"
+    data-semantics="{{ stage.semantics }}"
+  >
+    <header class="crm-col-head">
+      <div class="crm-col-title">
+        <span class="stage-name">{{ stage.name }}</span>
+        <span class="stage-count">{{ deals|length }}</span>
+      </div>
+      <div class="stage-sum">{{ money_label(col_sum or 0) }}</div>
+    </header>
+
+    <div class="crm-col-body">
+      <div class="col-empty" {% if deals %}hidden{% endif %}>{{ "Перетащите сделку сюда" if can_edit else "Пусто" }}</div>
+      {% for deal in deals %}
+        {% with tasks_open=open_tasks.get(deal.id, 0), overdue_open=overdue_tasks.get(deal.id, 0), can_drag=can_edit %}
+          {% include "deals/_card.html" %}
+        {% endwith %}
+      {% endfor %}
+    </div>
+
+    {% if can_edit %}
+    <footer class="crm-col-foot">
+      <button type="button" class="quick-open">+ Сделка</button>
+      <form class="quick-form" hidden>
+        <input name="title" placeholder="Название работы" autocomplete="off">
+        <input name="car" placeholder="Авто, госномер" autocomplete="off">
+        <input name="opportunity" inputmode="decimal" placeholder="Сумма, ₽" autocomplete="off">
+        <div class="quick-actions">
+          <button type="submit" class="btn btn-sm">Создать</button>
+          <button type="button" class="btn btn-ghost btn-sm quick-cancel">Отмена</button>
+        </div>
+        <p class="quick-error" hidden></p>
+      </form>
+    </footer>
+    {% endif %}
+  </section>
+  {% else %}
+  <p class="muted board-empty">Администратор ещё не открыл вам ни одну воронку.</p>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/kanban.js') }}"></script>
+{% endblock %}

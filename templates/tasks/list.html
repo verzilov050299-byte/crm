@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Задачи — BizCRM{% endblock %}
+
+{% block content %}
+<div class="page-head">
+<h1>Задачи</h1>
+  <div class="page-actions">
+  <a class="btn" href="{{ url_for('tasks_new') }}">+ Задача</a>
+  </div>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Задача</th>
+        <th>Срок</th>
+        <th>Сделка / контакт</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in tasks %}
+      <tr>
+        <td class="{% if t.is_done %}done{% endif %}">
+          <strong>{{ t.title }}</strong>
+          {% if t.description %}<div class="muted">{{ t.description }}</div>{% endif %}
+        </td>
+        <td class="{% if t.is_overdue %}overdue{% endif %}">
+          {{ t.deadline.strftime('%d.%m.%Y') if t.deadline else '—' }}
+          {% if t.is_overdue %}<div>просрочено</div>{% endif %}
+        </td>
+        <td>
+          {% if t.deal %}{{ t.deal.title }}{% endif %}
+          {% if t.contact %}<div class="muted">{{ t.contact.full_name }}</div>{% endif %}
+        </td>
+        <td>
+          <form style="display:inline" method="post" action="{{ url_for('tasks_toggle', task_id=t.id) }}">
+            <button class="btn btn-ghost btn-sm" type="submit">
+              {% if t.is_done %}Вернуть{% else %}Готово{% endif %}
+            </button>
+          </form>
+          <form style="display:inline" method="post" action="{{ url_for('tasks_delete', task_id=t.id) }}" onsubmit="return confirm('Удалить задачу?')">
+            <button class="btn btn-danger btn-sm" type="submit">Удалить</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="muted">Пока нет задач</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

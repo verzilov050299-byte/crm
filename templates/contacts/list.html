@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Контакты — BizCRM{% endblock %}
+
+{% block content %}
+<div class="page-head">
+<h1>Контакты</h1>
+  <div class="page-actions">
+  <a class="btn" href="{{ url_for('contacts_new') }}">+ Контакт</a>
+  </div>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Имя</th>
+        <th>Телефон</th>
+        <th>Email</th>
+        <th>Компания</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in contacts %}
+      <tr>
+        <td>
+          <strong>{{ c.full_name }}</strong>
+          {% if c.post %}<div class="muted">{{ c.post }}</div>{% endif %}
+        </td>
+        <td>{{ c.phone or '—' }}</td>
+        <td>{{ c.email or '—' }}</td>
+        <td>{{ c.company.title if c.company else '—' }}</td>
+        <td>
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('contacts_edit', contact_id=c.id) }}">Изменить</a>
+          <form style="display:inline" method="post" action="{{ url_for('contacts_delete', contact_id=c.id) }}" onsubmit="return confirm('Удалить контакт?')">
+            <button class="btn btn-danger btn-sm" type="submit">Удалить</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="muted">Пока нет контактов</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

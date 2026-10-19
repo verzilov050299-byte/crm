@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Сотрудники — BizCRM{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Сотрудники</h1>
+    <p class="muted">Приглашения и сброс пароля уходят на почту.</p>
+  </div>
+  <a class="btn" href="{{ url_for('users_invite') }}">+ Пригласить</a>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Имя</th>
+        <th>Логин</th>
+        <th>Почта</th>
+        <th>Роль</th>
+        <th>Статус</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in users %}
+      <tr>
+        <td><strong>{{ item.name }}</strong></td>
+        <td>{{ item.login }}</td>
+        <td>{{ item.email or "—" }}</td>
+        <td>{{ item.role.name }}</td>
+        <td>
+          {% if item.is_active %}
+          <span class="badge success">активен</span>
+          {% else %}
+          <span class="badge failure">выключен</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if item.email %}
+          <form style="display:inline" method="post" action="{{ url_for('users_reset_password', user_id=item.id) }}">
+            <button class="btn btn-ghost btn-sm" type="submit">Новый пароль</button>
+          </form>
+          {% endif %}
+          {% if item.id != current_user.id %}
+          <form style="display:inline" method="post" action="{{ url_for('users_toggle', user_id=item.id) }}">
+            <button class="btn btn-ghost btn-sm" type="submit">
+              {% if item.is_active %}Отключить{% else %}Включить{% endif %}
+            </button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

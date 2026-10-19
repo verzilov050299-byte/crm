@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{% if company %}Редактировать{% else %}Новая{% endif %} компания — BizCRM{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h1>{% if company %}Редактировать компанию{% else %}Новая компания{% endif %}</h1>
+  <a class="btn btn-ghost" href="{{ url_for('companies_list') }}">Назад</a>
+</div>
+
+<form class="form" method="post">
+  <label>Название *
+    <input name="title" required value="{{ company.title if company else '' }}">
+  </label>
+  <label>Телефон
+    <input name="phone" value="{{ company.phone if company else '' }}">
+  </label>
+  <label>Email
+    <input type="email" name="email" value="{{ company.email if company else '' }}">
+  </label>
+  <label>Адрес
+    <input name="address" value="{{ company.address if company else '' }}">
+  </label>
+  <label>Комментарий
+    <textarea name="comments" rows="3">{{ company.comments if company else '' }}</textarea>
+  </label>
+  <div class="form-actions">
+    <button class="btn" type="submit">Сохранить</button>
+  </div>
+</form>
+{% endblock %}

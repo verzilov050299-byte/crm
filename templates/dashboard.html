@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Дашборд — BizCRM{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Дашборд</h1>
+    <p class="muted">Сегодня {{ today.strftime('%d.%m.%Y') }} · обзор продаж и задач</p>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-ghost" href="{{ url_for('leads_new') }}">+ Лид</a>
+    <a class="btn" href="{{ url_for('deals_new') }}">+ Сделка</a>
+  </div>
+</div>
+
+<section class="hero-banner">
+  <div class="panel">
+    <span class="eyebrow">Воронка в работе</span>
+    <h2>{{ '{:,.0f}'.format(open_deals_sum).replace(',', ' ') }} ₽</h2>
+    <p>{{ open_deals_count }} активных сделок. Держи фокус на ближайших закрытиях и просроченных задачах.</p>
+    <div class="hero-actions">
+      <a class="btn" href="{{ url_for('deals_kanban') }}">Открыть канбан</a>
+      <a class="btn btn-ghost" href="{{ url_for('tasks_list') }}" style="background:rgba(255,255,255,0.1);color:#fff;border-color:rgba(255,255,255,0.15)">Задачи</a>
+    </div>
+  </div>
+  <div class="stat-card accent">
+    <div class="label">Уже выиграно</div>
+    <div class="value">{{ '{:,.0f}'.format(won_sum).replace(',', ' ') }} ₽</div>
+    <p class="muted" style="color:rgba(255,255,255,0.55);margin:14px 0 0">Сделки со стадией success</p>
+  </div>
+</section>
+
+{% if funnel_stats %}
+<div class="funnel-stats">
+  {% for item in funnel_stats %}
+  <a class="funnel-stat" style="--stage: {{ item.funnel.color }}" href="{{ url_for('deals_kanban', funnel=item.funnel.id) }}">
+    <span>{{ item.funnel.name }}</span>
+    <b>{{ item.count }}</b>
+    <small>{{ money_label(item.sum) }}</small>
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="cards">
+  <div class="stat-card">
+    <div class="label">Контакты</div>
+    <div class="value">{{ contacts_count }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Компании</div>
+    <div class="value">{{ companies_count }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Активные лиды</div>
+    <div class="value">{{ leads_count }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Сделки в работе</div>
+    <div class="value">{{ open_deals_count }}</div>
+  </div>
+</div>
+
+<div class="two-col">
+  <section class="panel">
+    <h2>Задачи на сегодня</h2>
+    {% if tasks_today %}
+      <ul class="list-clean">
+        {% for t in tasks_today %}
+          <li>
+            <div class="left">
+              <span class="title">{{ t.title }}</span>
+              <span class="muted">срок сегодня</span>
+            </div>
+            <span class="badge warn">today</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">На сегодня задач нет — можно заняться воронкой.</p>
+    {% endif %}
+
+    {% if overdue %}
+      <h3 class="overdue">Просроченные</h3>
+      <ul class="list-clean">
+        {% for t in overdue %}
+          <li>
+            <div class="left">
+              <span class="title overdue">{{ t.title }}</span>
+              <span class="muted">{{ t.deadline.strftime('%d.%m.%Y') }}</span>
+            </div>
+            <span class="badge failure">late</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+
+  <section class="panel">
+    <h2>Последние сделки</h2>
+    <ul class="list-clean">
+      {% for d in recent_deals %}
+        <li>
+          <div class="left">
+            <a class="title" href="{{ url_for('deals_edit', deal_id=d.id) }}">{{ d.title }}</a>
+            <span class="muted">{{ '{:,.0f}'.format(d.opportunity or 0).replace(',', ' ') }} ₽</span>
+          </div>
+          {% if d.stage %}
+            <span class="badge {% if d.stage.semantics == 'success' %}success{% elif d.stage.semantics == 'failure' %}failure{% endif %}">
+              {{ d.stage.name }}
+            </span>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+{% endblock %}

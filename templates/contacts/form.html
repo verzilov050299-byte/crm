@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{% if contact %}Редактировать{% else %}Новый{% endif %} контакт — BizCRM{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h1>{% if contact %}Редактировать контакт{% else %}Новый контакт{% endif %}</h1>
+  <a class="btn btn-ghost" href="{{ url_for('contacts_list') }}">Назад</a>
+</div>
+
+<form class="form" method="post">
+  <label>Имя *
+    <input name="name" required value="{{ contact.name if contact else '' }}">
+  </label>
+  <label>Фамилия
+    <input name="last_name" value="{{ contact.last_name if contact else '' }}">
+  </label>
+  <label>Телефон
+    <input name="phone" value="{{ contact.phone if contact else '' }}">
+  </label>
+  <label>Email
+    <input type="email" name="email" value="{{ contact.email if contact else '' }}">
+  </label>
+  <label>Должность
+    <input name="post" value="{{ contact.post if contact else '' }}">
+  </label>
+  <label>Компания
+    <select name="company_id">
+      <option value="">— без компании —</option>
+      {% for company in companies %}
+        <option value="{{ company.id }}" {% if contact and contact.company_id == company.id %}selected{% endif %}>
+          {{ company.title }}
+        </option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Комментарий
+    <textarea name="comments" rows="3">{{ contact.comments if contact else '' }}</textarea>
+  </label>
+  <div class="form-actions">
+    <button class="btn" type="submit">Сохранить</button>
+  </div>
+</form>
+{% endblock %}
